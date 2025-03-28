@@ -1,6 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -14,10 +15,13 @@ export class AuthService {
 
     if (existEmail) throw new ConflictException('이미 존재하는 이메일 입니다.');
 
+    const saltRounds = 10;
+    const hashPwd = await bcrypt.hash(registerDto.password, saltRounds);
+
     await this.prisma.users.create({
       data: {
         email: registerDto.email,
-        password: registerDto.password,
+        password: hashPwd,
         name: registerDto.name,
       },
     });
