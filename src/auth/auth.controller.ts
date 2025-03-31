@@ -22,7 +22,7 @@ export class AuthController {
   @Get('kakao/login')
   kakaoLogin(@Res() res: Response) {
     const REST_API_KEY = process.env.KAKAO_REST_API_KEY;
-    const REDIRECT_URI = 'http://localhost:3000/auth/kakao/callback';
+    const REDIRECT_URI = 'https://yeol.store/auth/kakao/callback';
 
     const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}`;
     res.redirect(kakaoAuthUrl);
@@ -42,8 +42,7 @@ export class AuthController {
   @Get('kakao/logout')
   kakaoLogout(@Res() res: Response) {
     const REST_API_KEY = process.env.KAKAO_REST_API_KEY;
-    const LOGOUT_REDIRECT_URI =
-      'http://localhost:3000/auth/kakao/logout-success'; // 나중에 프론트로 딥링크 가능
+    const LOGOUT_REDIRECT_URI = 'https://yeol.store/auth/kakao/logout-success'; // 나중에 프론트로 딥링크 가능
 
     const logoutUrl = `https://kauth.kakao.com/oauth/logout?client_id=${REST_API_KEY}&logout_redirect_uri=${LOGOUT_REDIRECT_URI}`;
     res.redirect(logoutUrl);
