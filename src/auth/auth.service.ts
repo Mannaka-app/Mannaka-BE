@@ -87,7 +87,7 @@ export class AuthService {
         new URLSearchParams({
           grant_type: 'authorization_code',
           client_id: process.env.KAKAO_REST_API_KEY,
-          redirect_uri: 'http://localhost:3000/auth/kakao/callback',
+          redirect_uri: 'https://yeol.store/auth/kakao/callback',
           code,
         }),
         {
