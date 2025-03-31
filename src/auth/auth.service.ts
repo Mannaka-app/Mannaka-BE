@@ -9,12 +9,17 @@ import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class AuthService {
+  private readonly KAKAO_CLIENT_ID = process.env.KAKAO_REST_API_KEY;
+  private readonly REDIRECT_URI = 'http://localhost:3000/auth/kakao/callback';
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
+    private readonly httpService: HttpService,
   ) {}
 
   // 회원 가입
@@ -73,5 +78,49 @@ export class AuthService {
       if (err instanceof UnauthorizedException) throw err;
       throw new InternalServerErrorException('서버에서 오류가 발생했습니다.');
     }
+  }
+
+  async exchangeCodeForToken(code: string): Promise<string> {
+    const tokenRes = await firstValueFrom(
+      this.httpService.post(
+        'https://kauth.kakao.com/oauth/token',
+        new URLSearchParams({
+          grant_type: 'authorization_code',
+          client_id: process.env.KAKAO_REST_API_KEY,
+          redirect_uri: 'http://localhost:3000/auth/kakao/callback',
+          code,
+        }),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        },
+      ),
+    );
+
+    return tokenRes.data.access_token;
+  }
+
+  async getUserInfoFromKakao(accessToken: string) {
+    const userRes = await firstValueFrom(
+      this.httpService.get('https://kapi.kakao.com/v2/user/me', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }),
+    );
+
+    const kakaoUser = userRes.data;
+    console.log('✅ 카카오 사용자 정보:', kakaoUser);
+    return kakaoUser;
+  }
+
+  async generateToken(data) {
+    const token = this.jwt.sign({
+      id: data.id,
+      profile: data.kakao_acount.profile,
+    });
+
+    return token;
   }
 }
