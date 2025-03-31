@@ -117,8 +117,8 @@ export class AuthService {
 
   async generateToken(data) {
     const token = this.jwt.sign({
-      id: data.id,
-      profile: data.kakao_acount.profile,
+      data: data.id,
+      profile: data.kakao_account.profile,
     });
 
     return token;
